@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodSave — Surplus Food, Matched in Minutes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F6F2E7;
+    --surface: #FFFFFF;
+    --surface-2: #EBE6D6;
+    --ink: #24261F;
+    --ink-muted: #6B6A5C;
+    --dark: #1E3327;
+    --gold: #C99A2E;
+    --gold-dark: #A67E20;
+    --urgent: #B4472F;
+    --line: #DED8C4;
+    --radius-s: 3px;
+    --radius-m: 8px;
+  }
+  [data-theme="dark"]{
+    --bg: #111A15;
+    --surface: #18261E;
+    --surface-2: #213328;
+    --ink: #F0ECE1;
+    --ink-muted: #9EABA0;
+    --dark: #1E3327;
+    --gold: #D6A83C;
+    --line: #2C4033;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased; transition: background .2s, color .2s; }
+  [data-theme="dark"] header{ background:rgba(17,26,21,0.92); }
+  [data-theme="dark"] .ticket{ background:var(--surface); }
+  [data-theme="dark"] .history-table-wrap{ background:var(--surface); }
+  [data-theme="dark"] table.history-table th{ background:var(--surface-2); color:var(--gold); }
+  [data-theme="dark"] table.history-table td{ color:var(--ink); }
+  h1,h2,h3{ font-family:'Fraunces', serif; font-weight:600; }
+  a{ color:inherit; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 28px; }
+
+  header{ position:sticky; top:0; z-index:50; background:rgba(246,242,231,0.92); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); transition: background .2s; }
+  .nav{ display:flex; align-items:center; justify-content:space-between; height:68px; }
+  .brand{ font-family:'Fraunces',serif; font-weight:600; font-size:1.3rem; display:flex; align-items:center; gap:9px; }
+  .brand .leaf{ width:10px; height:10px; background:var(--gold); border-radius:50% 0 50% 50%; display:inline-block; }
+  .nav-links{ display:flex; gap:24px; align-items:center; }
+  .nav-links a{ font-size:0.94rem; text-decoration:none; color:var(--ink-muted); transition:color .15s; }
+  .nav-links a:hover{ color:var(--ink); }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 22px; border-radius:var(--radius-s); border:none; font-family:'Inter',sans-serif; font-weight:600; font-size:0.94rem; cursor:pointer; text-decoration:none; transition:transform .12s, background .15s; }
+  .btn-primary{ background:var(--dark); color:#F3EFE0; }
+  .btn-primary:hover{ background:#152820; }
+  .btn-primary:active{ transform:scale(0.98); }
+  .btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn-ghost:hover{ border-color:var(--gold); }
+  .btn-danger-ghost{ background:transparent; color:#E08468; border:1px solid #5A352D; }
+  .btn-danger-ghost:hover{ background:#3E241D; border-color:#E08468; }
+
+  .hero{ padding:88px 0 64px; }
+  .hero-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:center; }
+  .hero h1{ font-size:3.2rem; line-height:1.1; letter-spacing:-0.01em; color:var(--dark); }
+  .hero p.lead{ margin-top:22px; font-size:1.15rem; color:var(--ink-muted); max-width:46ch; }
+  .hero-cta{ margin-top:32px; display:flex; gap:14px; }
+
+  .ticket{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-m); padding:26px; box-shadow:0 18px 40px -20px rgba(30,51,39,0.35); transform:rotate(-1deg); }
+  .ticket-row{ display:flex; justify-content:space-between; font-size:0.82rem; color:var(--ink-muted); padding-bottom:14px; border-bottom:1px dashed var(--line); margin-bottom:14px; }
+  .ticket h3{ font-size:1.1rem; margin-bottom:6px; font-family:'Fraunces',serif; }
+  .ticket .status{ display:inline-block; font-size:0.78rem; font-weight:600; padding:4px 10px; background:#EAF1E5; color:#3B6B3E; border-radius:20px; margin-top:10px; }
+  .ticket .ngo-line{ display:flex; align-items:center; gap:10px; margin-top:18px; }
+  .avatar{ width:38px; height:38px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:600; color:var(--dark); }
+
+  section{ padding:80px 0; }
+  .section-head{ max-width:640px; margin-bottom:48px; }
+  .section-head h2{ font-size:2.1rem; color:var(--dark); }
+  .section-head p{ margin-top:12px; color:var(--ink-muted); font-size:1.05rem; }
+
+  .steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+  .step{ border-top:2px solid var(--dark); padding-top:16px; }
+  .step .num{ font-family:'Fraunces',serif; font-size:1.6rem; color:var(--gold); font-weight:600; }
+  .step h3{ margin-top:10px; font-size:1.05rem; font-family:'Inter',sans-serif; font-weight:600; }
+  .step p{ margin-top:8px; color:var(--ink-muted); font-size:0.92rem; }
+
+  .demo{ background:var(--dark); border-radius:14px; overflow:hidden; }
+  .demo-inner{ padding:48px; }
+  .demo .section-head h2, .demo .section-head p{ color:#F3EFE0; }
+  .demo .section-head p{ color:#C7CFC6; }
+
+  .panel{ background:#25392C; border:1px solid #38503F; border-radius:var(--radius-m); padding:32px; max-width:640px; }
+  .progress{ display:flex; gap:6px; margin-bottom:28px; }
+  .progress .bar{ height:4px; flex:1; background:#3D5344; border-radius:2px; overflow:hidden; }
+  .progress .bar .fill{ height:100%; width:0%; background:var(--gold); transition:width .3s; }
+
+  .field-label{ font-size:0.85rem; color:#B9C2B4; margin-bottom:10px; display:block; }
+  .cat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:22px; }
+  .cat-btn{ background:#1E3327; border:1px solid #3D5344; color:#F3EFE0; border-radius:var(--radius-s); padding:14px 10px; font-size:0.88rem; cursor:pointer; text-align:center; transition:.15s; font-family:'Inter',sans-serif; }
+  .cat-btn:hover{ border-color:var(--gold); }
+  .cat-btn.selected{ background:var(--gold); border-color:var(--gold); color:#1E3327; font-weight:600; }
+
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px; }
+  input[type=text], input[type=number], select.custom-select{
+    width:100%; background:#1E3327; border:1px solid #3D5344; border-radius:var(--radius-s);
+    color:#F3EFE0; padding:13px 14px; font-family:'Inter',sans-serif; font-size:0.95rem;
+  }
+  select.custom-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C99A2E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    cursor: pointer;
+  }
+  select.custom-select option {
+    background: #1E3327;
+    color: #F3EFE0;
+  }
+  textarea{ width:100%; background:#1E3327; border:1px solid #3D5344; border-radius:var(--radius-s); color:#F3EFE0; padding:14px; font-family:'Inter',sans-serif; font-size:0.95rem; resize:vertical; min-height:80px; margin-bottom:22px; }
+  textarea::placeholder, input::placeholder{ color:#7F8B7C; }
+  textarea:focus, input:focus, select.custom-select:focus, .cat-btn:focus-visible, .btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  .diag-loading{ display:flex; align-items:center; gap:14px; padding:34px 0; color:#F3EFE0; }
+  .spinner{ width:22px; height:22px; border:2.5px solid #3D5344; border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .diag-result .tag{ display:inline-block; font-size:0.78rem; font-weight:600; padding:5px 12px; border-radius:20px; margin-bottom:14px; }
+  .tag.urgent{ background:#3E241D; color:#E08468; }
+  .tag.normal{ background:#2E3C25; color:var(--gold); }
+  .diag-result h3{ font-size:1.3rem; margin-bottom:8px; font-family:'Fraunces',serif; color:#F3EFE0; }
+  .diag-result .meta-line{ font-size:0.95rem; color:#C7CFC6; margin-bottom:22px; }
+  .ngo-cards{ display:grid; gap:12px; margin-bottom:22px; }
+  .ngo-card{ display:flex; align-items:center; justify-content:space-between; background:#1E3327; border:1px solid #3D5344; border-radius:var(--radius-s); padding:14px 16px; cursor:pointer; transition:border-color .15s, background .15s; }
+  .ngo-card:hover{ border-color:var(--gold); }
+  .ngo-card.active-ngo{ border-color:var(--gold); background:#284232; box-shadow:0 0 0 1px var(--gold); }
+  .ngo-card .who{ display:flex; align-items:center; gap:12px; }
+  .ngo-card .who .avatar{ background:#3D5344; color:#F3EFE0; }
+  .ngo-card .name{ font-weight:600; font-size:0.94rem; color:#F3EFE0; }
+  .ngo-card .meta{ font-size:0.8rem; color:#9CA79A; margin-top:2px; }
+  .ngo-card .capacity{ font-weight:600; font-size:0.88rem; color:var(--gold); text-align:right; }
+
+  .confirm-box{ text-align:center; padding:20px 0; }
+  .confirm-box .check{ width:52px; height:52px; border-radius:50%; background:#3B6B3E; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 18px; }
+  .confirm-box h3{ font-size:1.3rem; margin-bottom:8px; color:#F3EFE0; }
+  .confirm-box p{ color:#C7CFC6; font-size:0.95rem; margin-bottom:24px; }
+
+  .panel-actions{ display:flex; gap:12px; margin-top:6px; }
+
+  .cols-2{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-m); padding:28px; }
+  .card h3{ font-size:1.15rem; margin-bottom:10px; font-family:'Fraunces',serif; }
+  .card p{ color:var(--ink-muted); font-size:0.94rem; }
+  .card ul{ margin-top:14px; padding-left:18px; color:var(--ink-muted); font-size:0.92rem; }
+  .card li{ margin-bottom:6px; }
+
+  /* History Table Section */
+  .history-section{ background:var(--surface); border-top:1px solid var(--line); padding:64px 0; }
+  .history-table-wrap{ overflow-x:auto; margin-top:24px; border:1px solid var(--line); border-radius:var(--radius-m); background:#fff; }
+  table.history-table{ width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem; }
+  table.history-table th{ background:var(--surface-2); padding:12px 16px; font-family:'Fraunces',serif; font-size:0.88rem; color:var(--dark); font-weight:600; border-bottom:1px solid var(--line); }
+  table.history-table td{ padding:14px 16px; border-bottom:1px solid var(--line); color:var(--ink); }
+  table.history-table tr:last-child td{ border-bottom:none; }
+  .status-badge{ display:inline-block; font-size:0.75rem; font-weight:600; padding:3px 8px; border-radius:12px; text-transform:uppercase; letter-spacing:0.04em; }
+  .status-badge.confirmed{ background:#EAF1E5; color:#2D5A30; }
+  .status-badge.matched{ background:#FBF3DC; color:#8A620F; }
+  .status-badge.pending{ background:#F3EBE8; color:#9E361F; }
+  .status-badge.closed{ background:#434A44; color:#D3DAD3; }
+  .urgency-pill{ display:inline-block; font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:4px; }
+  .urgency-pill.high{ background:#FCEAE6; color:#B4472F; }
+  .urgency-pill.normal{ background:#EEF3ED; color:#3D6740; }
+
+  footer{ border-top:1px solid var(--line); padding:36px 0; }
+  .foot-row{ display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--ink-muted); }
+
+  @media (max-width: 860px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .hero h1{ font-size:2.3rem; }
+    .steps{ grid-template-columns:1fr 1fr; }
+    .cols-2{ grid-template-columns:1fr; }
+    .nav-links{ display:none; }
+    .demo-inner{ padding:26px; }
+    .panel{ padding:22px; }
+    .row2{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="leaf"></span>FoodSave</div>
+    <nav class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#demo">Try it</a>
+      <a href="#history">Database Log</a>
+      <a href="#ngos">For NGOs</a>
+      <button id="theme-toggle" class="btn btn-ghost" style="padding:6px 12px; font-size:0.85rem;" aria-label="Toggle theme">🌙 Dark</button>
+    </nav>
+    <a href="#demo" class="btn btn-primary">List surplus food</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <h1>Surplus food shouldn't end up in the bin.</h1>
+        <p class="lead">FoodSave estimates how much food a restaurant or event has left over, how long it stays safe to eat, and matches it instantly with the nearest NGO or shelter that can pick it up — before it goes to waste.</p>
+        <div class="hero-cta">
+          <a href="#demo" class="btn btn-primary">Try the matching demo</a>
+          <a href="#history" class="btn btn-ghost">View Live Database Log</a>
+        </div>
+      </div>
+      <div class="ticket" id="hero-live-ticket">
+        <div class="ticket-row"><span id="hero-ticket-id">Donation #FS-1042</span><span id="hero-ticket-city">Indore, MP</span></div>
+        <h3 id="hero-ticket-title">42 servings of cooked rice & dal</h3>
+        <p id="hero-ticket-shelf" style="color:var(--ink-muted); font-size:0.9rem;">Safe to serve for: ~3 hours · Category: Cooked meal</p>
+        <span class="status" id="hero-ticket-status">Matched via MySQL</span>
+        <div class="ngo-line">
+          <div class="avatar" id="hero-ticket-avatar">AN</div>
+          <div>
+            <div id="hero-ticket-ngo" style="font-size:0.92rem; font-weight:600;">Asha Night Shelter</div>
+            <div id="hero-ticket-meta" style="font-size:0.8rem; color:var(--ink-muted);">Vijay Nagar · Capacity 70/day</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>From leftover to delivered, in four steps</h2>
+        <p>No phone calls to five different NGOs hoping someone picks up.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="num">01</div><h3>List what's left</h3><p>Category, rough quantity, and when it was prepared.</p></div>
+        <div class="step"><div class="num">02</div><h3>AI estimates</h3><p>We calculate safe-to-eat window and how many people it feeds.</p></div>
+        <div class="step"><div class="num">03</div><h3>Get matched</h3><p>Nearest NGO or shelter with enough capacity is shown instantly.</p></div>
+        <div class="step"><div class="num">04</div><h3>Confirm pickup</h3><p>NGO confirms and arrives within the safe window — you track it live.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div class="wrap">
+      <div class="demo">
+        <div class="demo-inner">
+          <div class="section-head">
+            <h2>Try the matching flow</h2>
+            <p>A live full-stack system connected to MySQL — list surplus food and match with verified local NGOs.</p>
+          </div>
+
+          <div class="panel">
+            <div class="progress">
+              <div class="bar"><div class="fill" id="fill-1"></div></div>
+              <div class="bar"><div class="fill" id="fill-2"></div></div>
+              <div class="bar"><div class="fill" id="fill-3"></div></div>
+            </div>
+
+            <!-- STEP 1 -->
+            <div id="step-1">
+              <span class="field-label">What type of food is it?</span>
+              <div class="cat-grid" id="cat-grid">
+                <button class="cat-btn" data-cat="Cooked meal">🍛 Cooked meal</button>
+                <button class="cat-btn" data-cat="Bakery">🥖 Bakery</button>
+                <button class="cat-btn" data-cat="Fruits & Veg">🥦 Fruits/Veg</button>
+                <button class="cat-btn" data-cat="Packaged">📦 Packaged</button>
+              </div>
+
+              <!-- City and Donor details -->
+              <div class="row2">
+                <div>
+                  <span class="field-label">City</span>
+                  <select id="city-select" class="custom-select">
+                    <option value="Bhopal">Bhopal</option>
+                    <option value="Indore" selected>Indore</option>
+                    <option value="Sehore">Sehore</option>
+                  </select>
+                </div>
+                <div>
+                  <span class="field-label">Donor Name / Business</span>
+                  <input type="text" id="donor-name" placeholder="e.g. Royal Palace Banquet" value="Royal Palace Banquet">
+                </div>
+              </div>
+
+              <div class="row2">
+                <div>
+                  <span class="field-label">Approx. servings / quantity</span>
+                  <input type="number" id="qty" placeholder="e.g. 40" min="1">
+                </div>
+                <div>
+                  <span class="field-label">Prepared / packed how long ago?</span>
+                  <input type="text" id="age" placeholder="e.g. 1 hour ago" value="1 hour ago">
+                </div>
+              </div>
+
+              <span class="field-label">Anything else worth mentioning</span>
+              <textarea id="desc" placeholder="e.g. Event got over early, rice and dal barely touched, still hot..."></textarea>
+              <div class="panel-actions">
+                <button class="btn btn-primary" id="to-step-2" disabled>Estimate & match</button>
+              </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="step-2" style="display:none;"></div>
+
+            <!-- STEP 3 -->
+            <div id="step-3" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE DATABASE ACTIVITY -->
+  <section id="history" class="history-section">
+    <div class="wrap">
+      <div class="section-head" style="margin-bottom:20px;">
+        <h2>Live Database Activity</h2>
+        <p>Real-time records queried directly from MySQL <code>listings</code>, <code>donors</code>, and <code>ngos</code> tables.</p>
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+        <button id="refresh-history-btn" class="btn btn-ghost" style="font-size:0.85rem; padding:6px 14px;">↻ Refresh Records</button>
+      </div>
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Donor</th>
+              <th>City</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Urgency</th>
+              <th>Shelf Life</th>
+              <th>Matched NGO</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td colspan="10" style="text-align:center; padding:24px; color:var(--ink-muted);">Loading database records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="ngos">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Built for both sides of the handoff</h2>
+        <p>Donors need it to be effortless. NGOs need it to be reliable.</p>
+      </div>
+      <div class="cols-2">
+        <div class="card">
+          <h3>For restaurants & event hosts</h3>
+          <p>Turning surplus into a pickup takes under a minute — no calling around, no guessing who can take it.</p>
+          <ul>
+            <li>Instant estimate of shelf-safe window</li>
+            <li>Matched to an NGO with real capacity to use it</li>
+            <li>Donation record for CSR/tax reporting</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>For NGOs & shelters</h3>
+          <p>A predictable stream of nearby donations instead of relying on sporadic calls.</p>
+          <ul>
+            <li>Real-time alerts matched to current capacity</li>
+            <li>Verified donor history and food safety notes</li>
+            <li>Pickup logistics coordinated in-app</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-row">
+    <span>FoodSave — Technology Entrepreneurship project, MGT</span>
+    <span>Built by Satanand Patel</span>
+  </div>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
