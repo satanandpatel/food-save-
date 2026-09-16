@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
 
     // 1. Find or create donor
     const [existingDonors] = await pool.query(
-      'SELECT id FROM donors WHERE name = ? AND city = ? LIMIT 1',
+      'SELECT id FROM donors WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) AND LOWER(TRIM(city)) = LOWER(TRIM(?)) LIMIT 1',
       [donor_name, city]
     );
 
@@ -77,7 +77,7 @@ router.post('/', async (req, res) => {
     const [matchedNgos] = await pool.query(
       `SELECT id, name, city, area, contact_phone, capacity_per_day
        FROM ngos
-       WHERE city = ? AND capacity_per_day >= ? AND active = 1
+       WHERE LOWER(TRIM(city)) = LOWER(TRIM(?)) AND capacity_per_day >= ? AND (active = true OR active IS TRUE)
        ORDER BY capacity_per_day ASC
        LIMIT 3`,
       [city, parsedQty]
@@ -99,7 +99,7 @@ router.post('/', async (req, res) => {
     const [createdListingRows] = await pool.query(
       `SELECT l.*, d.name AS donor_name, d.city AS donor_city, d.type AS donor_type, d.phone AS donor_phone
        FROM listings l
-       JOIN donors d ON l.donor_id = d.id
+       LEFT JOIN donors d ON l.donor_id = d.id
        WHERE l.id = ?`,
       [listingId]
     );
@@ -160,7 +160,7 @@ router.post('/:id/confirm', async (req, res) => {
         n.id AS ngo_id, n.name AS ngo_name, n.city AS ngo_city, n.area AS ngo_area,
         n.contact_phone AS ngo_phone, n.capacity_per_day AS ngo_capacity
        FROM listings l
-       JOIN donors d ON l.donor_id = d.id
+       LEFT JOIN donors d ON l.donor_id = d.id
        LEFT JOIN ngos n ON l.matched_ngo_id = n.id
        WHERE l.id = ?`,
       [listingId]
@@ -207,7 +207,7 @@ router.post('/:id/close', async (req, res) => {
         n.id AS ngo_id, n.name AS ngo_name, n.city AS ngo_city, n.area AS ngo_area,
         n.contact_phone AS ngo_phone, n.capacity_per_day AS ngo_capacity
        FROM listings l
-       JOIN donors d ON l.donor_id = d.id
+       LEFT JOIN donors d ON l.donor_id = d.id
        LEFT JOIN ngos n ON l.matched_ngo_id = n.id
        WHERE l.id = ?`,
       [listingId]
@@ -237,7 +237,7 @@ router.get('/', async (req, res) => {
         n.id AS ngo_id, n.name AS ngo_name, n.city AS ngo_city, n.area AS ngo_area,
         n.contact_phone AS ngo_phone, n.capacity_per_day AS ngo_capacity
        FROM listings l
-       JOIN donors d ON l.donor_id = d.id
+       LEFT JOIN donors d ON l.donor_id = d.id
        LEFT JOIN ngos n ON l.matched_ngo_id = n.id
        ORDER BY l.created_at DESC
        LIMIT 100`

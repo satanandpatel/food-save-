@@ -19,7 +19,7 @@ router.get('/match', async (req, res) => {
     const [ngos] = await pool.query(
       `SELECT id, name, city, area, contact_phone, capacity_per_day, active
        FROM ngos
-       WHERE city = ? AND capacity_per_day >= ? AND active = 1
+       WHERE LOWER(TRIM(city)) = LOWER(TRIM(?)) AND capacity_per_day >= ? AND (active = true OR active IS TRUE)
        ORDER BY capacity_per_day ASC
        LIMIT 3`,
       [city, parsedQty]
@@ -45,11 +45,11 @@ router.get('/match', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { city } = req.query;
-    let query = 'SELECT * FROM ngos WHERE active = 1';
+    let query = 'SELECT * FROM ngos WHERE (active = true OR active IS TRUE)';
     const params = [];
 
     if (city) {
-      query += ' AND city = ?';
+      query += ' AND LOWER(TRIM(city)) = LOWER(TRIM(?))';
       params.push(city);
     }
     query += ' ORDER BY city ASC, capacity_per_day DESC';
