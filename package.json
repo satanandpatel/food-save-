@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "db:setup": "node src/db/migrate.js",
+    "db:setup:supabase": "node src/db/pgMigrate.js",
     "test:api": "node test/api-test.js"
   },
   "keywords": [
@@ -22,7 +23,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mysql2": "^3.12.0"
+    "mysql2": "^3.12.0",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "puppeteer-core": "^25.11.0"

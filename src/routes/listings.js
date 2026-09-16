@@ -65,11 +65,11 @@ router.post('/', async (req, res) => {
     } else {
       const validTypes = ['restaurant', 'event', 'mess'];
       const sanitizedType = validTypes.includes(donor_type) ? donor_type : 'restaurant';
-      const [donorResult] = await pool.query(
+      const [donorRows, donorResult] = await pool.query(
         'INSERT INTO donors (name, type, phone, city) VALUES (?, ?, ?, ?)',
         [donor_name, sanitizedType, donor_phone, city]
       );
-      donor_id = donorResult.insertId;
+      donor_id = donorRows?.[0]?.id || donorResult?.insertId || donorResult?.rows?.[0]?.id;
     }
 
     // 2. Query top 3 matching NGOs in that city:
@@ -87,14 +87,14 @@ router.post('/', async (req, res) => {
     const initialStatus = matchedNgos.length > 0 ? 'matched' : 'pending';
 
     // 3. Insert listing into database
-    const [listingResult] = await pool.query(
+    const [listingRows, listingResult] = await pool.query(
       `INSERT INTO listings (
         donor_id, category, quantity, prepared_at, shelf_life_hours, urgency, status
       ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [donor_id, category, parsedQty, prepDate, shelf_life_hours, urgency, initialStatus]
     );
 
-    const listingId = listingResult.insertId;
+    const listingId = listingRows?.[0]?.id || listingResult?.insertId || listingResult?.rows?.[0]?.id;
 
     const [createdListingRows] = await pool.query(
       `SELECT l.*, d.name AS donor_name, d.city AS donor_city, d.type AS donor_type, d.phone AS donor_phone

@@ -45,7 +45,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 if (require.main === module) {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n===========================================`);
     console.log(`🌿 FoodSave Server running on http://localhost:${PORT}`);
     console.log(`📊 Connected to MySQL database: ${process.env.DB_NAME || 'foodsave_db'}`);
